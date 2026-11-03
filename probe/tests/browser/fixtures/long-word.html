@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>long-word</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        padding: 0 16px;
+      }
+      .name {
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Длинное название</h1>
+      <div class="grid">
+        <div><h3 class="name">Короткое</h3></div>
+        <div><h3 class="name">Ферментированныйчайсбергамотом</h3></div>
+      </div>
+    </main>
+  </body>
+</html>

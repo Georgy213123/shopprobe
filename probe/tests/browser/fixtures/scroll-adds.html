@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>scroll-adds</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Подгрузка при прокрутке</h1>
+      <div style="height: 3000px"></div>
+      <div id="more"></div>
+      <script>
+        window.addEventListener(
+          'scroll',
+          () => {
+            const more = document.getElementById('more');
+            if (more.childElementCount) return;
+            more.innerHTML =
+              '<h1>Ещё товары</h1><div class="wide-promo" style="width:800px">Баннер</div>';
+          },
+          { once: true },
+        );
+      </script>
+    </main>
+  </body>
+</html>

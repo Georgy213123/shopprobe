@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>scroll-error</title>
+  </head>
+  <body>
+    <main>
+      <h1>Ошибка при прокрутке</h1>
+      <img src="/ok.svg" alt="исправная" width="40" height="30" />
+      <div style="height: 4000px"></div>
+      <script>
+        let done = false;
+        window.addEventListener('scroll', () => {
+          if (done) return;
+          done = true;
+          console.error('Трекер прокрутки: не удалось отправить событие');
+        });
+      </script>
+    </main>
+  </body>
+</html>
