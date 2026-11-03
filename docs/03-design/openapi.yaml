@@ -1,0 +1,494 @@
+openapi: 3.1.0
+info:
+  title: Чайная полка — API демо-витрины
+  description: Каталог с фасетным фильтром. Демо-витрина для проверки ShopProbe.
+  version: 1.0.0
+paths:
+  /api/health:
+    get:
+      tags:
+      - service
+      summary: Health
+      operationId: health_api_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /api/meta:
+    get:
+      tags:
+      - service
+      summary: Meta
+      operationId: meta_api_meta_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meta'
+  /api/categories:
+    get:
+      tags:
+      - catalog
+      summary: Categories
+      operationId: categories_api_categories_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CategoryOut'
+                type: array
+                title: Response Categories Api Categories Get
+  /api/catalog:
+    get:
+      tags:
+      - catalog
+      summary: Catalog
+      operationId: catalog_api_catalog_get
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          title: Category
+      - name: origin
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          title: Origin
+      - name: form
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          title: Form
+      - name: price_min
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            minimum: 0
+          - type: 'null'
+          title: Price Min
+      - name: price_max
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            minimum: 0
+          - type: 'null'
+          title: Price Max
+      - name: in_stock
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: In Stock
+      - name: sort
+        in: query
+        required: false
+        schema:
+          enum:
+          - popular
+          - price_asc
+          - price_desc
+          - name
+          type: string
+          default: popular
+          title: Sort
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 48
+          minimum: 1
+          default: 24
+          title: Per Page
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogPage'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/products/{slug}:
+    get:
+      tags:
+      - catalog
+      summary: Product
+      operationId: product_api_products__slug__get
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          description: Товар не найден
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/recommendations:
+    get:
+      tags:
+      - catalog
+      summary: Recommendations
+      operationId: recommendations_api_recommendations_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProductCard'
+                type: array
+                title: Response Recommendations Api Recommendations Get
+        '503':
+          description: Сервис рекомендаций недоступен (посаженный дефект)
+  /api/images/{slug}.svg:
+    get:
+      tags:
+      - media
+      summary: Image
+      operationId: image_api_images__slug__svg_get
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            image/svg+xml: {}
+        '404':
+          description: Нет товара
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    CatalogPage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ProductCard'
+          type: array
+          title: Items
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        per_page:
+          type: integer
+          title: Per Page
+        facets:
+          items:
+            $ref: '#/components/schemas/FacetGroupOut'
+          type: array
+          title: Facets
+        price_range:
+          $ref: '#/components/schemas/PriceRange'
+      type: object
+      required:
+      - items
+      - total
+      - page
+      - per_page
+      - facets
+      - price_range
+      title: CatalogPage
+    CategoryOut:
+      properties:
+        slug:
+          type: string
+          title: Slug
+        title:
+          type: string
+          title: Title
+        product_count:
+          type: integer
+          title: Product Count
+      type: object
+      required:
+      - slug
+      - title
+      - product_count
+      title: CategoryOut
+    FacetGroupOut:
+      properties:
+        key:
+          type: string
+          title: Key
+        title:
+          type: string
+          title: Title
+        values:
+          items:
+            $ref: '#/components/schemas/FacetValue'
+          type: array
+          title: Values
+      type: object
+      required:
+      - key
+      - title
+      - values
+      title: FacetGroupOut
+    FacetValue:
+      properties:
+        value:
+          type: string
+          title: Value
+        label:
+          type: string
+          title: Label
+        count:
+          type: integer
+          title: Count
+        selected:
+          type: boolean
+          title: Selected
+      type: object
+      required:
+      - value
+      - label
+      - count
+      - selected
+      title: FacetValue
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Health:
+      properties:
+        status:
+          type: string
+          const: ok
+          title: Status
+      type: object
+      required:
+      - status
+      title: Health
+    Meta:
+      properties:
+        name:
+          type: string
+          title: Name
+        seeded_bugs:
+          type: boolean
+          title: Seeded Bugs
+      type: object
+      required:
+      - name
+      - seeded_bugs
+      title: Meta
+    PriceRange:
+      properties:
+        min:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Min
+        max:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max
+      type: object
+      required:
+      - min
+      - max
+      title: PriceRange
+    ProductCard:
+      properties:
+        slug:
+          type: string
+          title: Slug
+        name:
+          type: string
+          title: Name
+        category:
+          type: string
+          title: Category
+        category_title:
+          type: string
+          title: Category Title
+        origin:
+          type: string
+          title: Origin
+        origin_title:
+          type: string
+          title: Origin Title
+        form:
+          type: string
+          title: Form
+        form_title:
+          type: string
+          title: Form Title
+        price:
+          type: integer
+          title: Price
+        weight_g:
+          type: integer
+          title: Weight G
+        in_stock:
+          type: boolean
+          title: In Stock
+        image_url:
+          type: string
+          title: Image Url
+      type: object
+      required:
+      - slug
+      - name
+      - category
+      - category_title
+      - origin
+      - origin_title
+      - form
+      - form_title
+      - price
+      - weight_g
+      - in_stock
+      - image_url
+      title: ProductCard
+    ProductDetail:
+      properties:
+        slug:
+          type: string
+          title: Slug
+        name:
+          type: string
+          title: Name
+        category:
+          type: string
+          title: Category
+        category_title:
+          type: string
+          title: Category Title
+        origin:
+          type: string
+          title: Origin
+        origin_title:
+          type: string
+          title: Origin Title
+        form:
+          type: string
+          title: Form
+        form_title:
+          type: string
+          title: Form Title
+        price:
+          type: integer
+          title: Price
+        weight_g:
+          type: integer
+          title: Weight G
+        in_stock:
+          type: boolean
+          title: In Stock
+        image_url:
+          type: string
+          title: Image Url
+        description:
+          type: string
+          title: Description
+      type: object
+      required:
+      - slug
+      - name
+      - category
+      - category_title
+      - origin
+      - origin_title
+      - form
+      - form_title
+      - price
+      - weight_g
+      - in_stock
+      - image_url
+      - description
+      title: ProductDetail
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
