@@ -1,0 +1,16 @@
+{
+  "name": "teashelf-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^24.19.2",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  }
+}
