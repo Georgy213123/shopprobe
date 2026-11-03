@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_Process_ToBe" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="Collab_Process_ToBe">
+    <bpmn:participant id="Pool_Process_ToBe" name="Приёмка релиза с ShopProbe (как будет)" processRef="Process_ToBe" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_ToBe" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Process_ToBe">
+      <bpmn:lane id="Lane_Process_ToBe_0" name="Разработчик">
+        <bpmn:flowNodeRef>Start_ToBe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Push</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Repro</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Process_ToBe_1" name="CI и ShopProbe">
+        <bpmn:flowNodeRef>Task_Stand</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Checks</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Retest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Report</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Confirmed</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Process_ToBe_2" name="Владелец магазина">
+        <bpmn:flowNodeRef>Task_Read</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Release</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_ToBe</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_ToBe" name="Изменение готово">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_Push" name="Отправить в репозиторий">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="Task_Stand" name="Поднять стенд витрины">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Checks" name="Прогнать проверки по маршрутам и вьюпортам">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Retest" name="Перепроверить каждую находку N раз">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Report" name="Собрать отчёт JSON и HTML">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Confirmed" name="Есть подтверждённые выше порога?">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_Repro" name="Воспроизвести по шагам из отчёта и исправить">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="Task_Read" name="Прочитать отчёт, нестабильное — в отдельный список">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:task id="Task_Release" name="Выкатить и запустить рекламу">
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_11</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="End_ToBe" name="Релиз принят">
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="Start_ToBe" targetRef="Task_Push" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Push" targetRef="Task_Stand" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_Stand" targetRef="Task_Checks" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_Checks" targetRef="Task_Retest" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Task_Retest" targetRef="Task_Report" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_Report" targetRef="Gw_Confirmed" />
+    <bpmn:sequenceFlow id="Flow_7" name="да: сборка падает" sourceRef="Gw_Confirmed" targetRef="Task_Repro" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Task_Repro" targetRef="Task_Push" />
+    <bpmn:sequenceFlow id="Flow_9" name="нет" sourceRef="Gw_Confirmed" targetRef="Task_Read" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_Read" targetRef="Task_Release" />
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Task_Release" targetRef="End_ToBe" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_Process_ToBe">
+    <bpmndi:BPMNPlane id="Plane_Process_ToBe" bpmnElement="Collab_Process_ToBe">
+      <bpmndi:BPMNShape id="Pool_Process_ToBe_di" bpmnElement="Pool_Process_ToBe" isHorizontal="true"><dc:Bounds x="160" y="80" width="1790" height="480" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Process_ToBe_0_di" bpmnElement="Lane_Process_ToBe_0" isHorizontal="true"><dc:Bounds x="190" y="80" width="1760" height="160" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Process_ToBe_1_di" bpmnElement="Lane_Process_ToBe_1" isHorizontal="true"><dc:Bounds x="190" y="240" width="1760" height="160" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Process_ToBe_2_di" bpmnElement="Lane_Process_ToBe_2" isHorizontal="true"><dc:Bounds x="190" y="400" width="1760" height="160" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_ToBe_di" bpmnElement="Start_ToBe"><dc:Bounds x="232" y="142" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Push_di" bpmnElement="Task_Push"><dc:Bounds x="360" y="120" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Stand_di" bpmnElement="Task_Stand"><dc:Bounds x="530" y="280" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Checks_di" bpmnElement="Task_Checks"><dc:Bounds x="700" y="280" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Retest_di" bpmnElement="Task_Retest"><dc:Bounds x="870" y="280" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Report_di" bpmnElement="Task_Report"><dc:Bounds x="1040" y="280" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Confirmed_di" bpmnElement="Gw_Confirmed" isMarkerVisible="true"><dc:Bounds x="1245" y="295" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Repro_di" bpmnElement="Task_Repro"><dc:Bounds x="1380" y="120" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Read_di" bpmnElement="Task_Read"><dc:Bounds x="1380" y="440" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Release_di" bpmnElement="Task_Release"><dc:Bounds x="1550" y="440" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_ToBe_di" bpmnElement="End_ToBe"><dc:Bounds x="1762" y="462" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1"><di:waypoint x="268" y="160" /><di:waypoint x="360" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2"><di:waypoint x="480" y="160" /><di:waypoint x="505" y="160" /><di:waypoint x="505" y="320" /><di:waypoint x="530" y="320" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3"><di:waypoint x="650" y="320" /><di:waypoint x="700" y="320" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4"><di:waypoint x="820" y="320" /><di:waypoint x="870" y="320" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5"><di:waypoint x="990" y="320" /><di:waypoint x="1040" y="320" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6"><di:waypoint x="1160" y="320" /><di:waypoint x="1245" y="320" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7"><di:waypoint x="1295" y="320" /><di:waypoint x="1337" y="320" /><di:waypoint x="1337" y="160" /><di:waypoint x="1380" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8"><di:waypoint x="1440" y="200" /><di:waypoint x="1440" y="226" /><di:waypoint x="420" y="226" /><di:waypoint x="420" y="200" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9"><di:waypoint x="1295" y="320" /><di:waypoint x="1337" y="320" /><di:waypoint x="1337" y="480" /><di:waypoint x="1380" y="480" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10"><di:waypoint x="1500" y="480" /><di:waypoint x="1550" y="480" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11"><di:waypoint x="1670" y="480" /><di:waypoint x="1762" y="480" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
