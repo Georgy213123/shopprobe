@@ -1,0 +1,41 @@
+# Стенд «Чайная полка»: `make up` (чистый) или `SEEDED_BUGS=1 make up` (с посаженными дефектами).
+# ShopProbe запускается снаружи: `make probe` (BASE_URL=http://localhost:5201).
+# Порты опубликованы только на 127.0.0.1: стенд демо не должен быть виден из сети.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: shopprobe
+    ports:
+      - "127.0.0.1:55201:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d shopprobe"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/shopprobe
+      SEEDED_BUGS: ${SEEDED_BUGS:-0}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8201:8201"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8201/api/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5201:8080"
