@@ -32,7 +32,7 @@ export async function retestFindings(
   const reproduced = new Map<string, number>();
   // Любая находка, которой не было в основном проходе, тоже попадает в отчёт и
   // перепроверяется так же: упавшая после первого визита витрина, новый ресурс с 404,
-  // нарушение на другом элементе (ревью Codex, R2, SP-01).
+  // нарушение на другом элементе.
   const emerged = new Map<string, { finding: Finding; count: number }>();
   for (const group of groups.values()) {
     const first = group[0]!;
@@ -40,7 +40,7 @@ export async function retestFindings(
     const known = new Set(group.map((f) => f.id));
     for (let i = 0; i < attempts; i++) {
       // Все проверки, а не только давшие находки: воспроизведению может быть нужна
-      // прокрутка или другое действие соседней проверки (ревью Codex, R3).
+      // прокрутка или другое действие соседней проверки.
       const visit = await inspectPage(browser, config, first.route, viewport);
       for (const f of visit.findings) {
         if (known.has(f.id)) reproduced.set(f.id, (reproduced.get(f.id) ?? 0) + 1);

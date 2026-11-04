@@ -142,7 +142,7 @@ export function matches(text: string, patterns: Array<string | RegExp>): boolean
   return patterns.some((p) => {
     if (typeof p === 'string') return text.includes(p);
     // У шаблонов с флагами g и y test() сдвигает lastIndex — без сброса каждое
-    // второе одинаковое сообщение проходило фильтр (ревью Codex, R10).
+    // второе одинаковое сообщение проходило фильтр.
     p.lastIndex = 0;
     return p.test(text);
   });

@@ -62,7 +62,7 @@ function isLine(x: unknown): x is CartLine {
 
 /**
  * Само обращение к window.localStorage бросает SecurityError, если браузер запретил
- * хранилище, — поэтому оно тоже внутри try (ревью Codex, R9).
+ * хранилище, — поэтому оно тоже внутри try.
  */
 export function browserStorage(): Storage | null {
   try {

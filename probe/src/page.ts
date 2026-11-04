@@ -39,7 +39,7 @@ export async function scrollThrough(page: Page, maxSteps = 40): Promise<void> {
 /**
  * Подготовка перед проверками: прокрутка до конца (lazy-load и подгрузка при прокрутке),
  * ожидание картинок и сети, возврат наверх. После неё все проверки, включая раскладку,
- * h1 и axe, видят страницу с подгруженным содержимым (ревью Codex, R3 и R8).
+ * h1 и axe, видят страницу с подгруженным содержимым.
  */
 export async function preparePage(page: Page, imagesTimeoutMs: number): Promise<void> {
   await scrollThrough(page);

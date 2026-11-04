@@ -25,7 +25,7 @@ export const a11yCheck: Check = async (ctx) => {
         severity: (v.impact ?? 'minor') as Severity,
         title: `Доступность: ${v.id}`,
         details: `${v.help}. Узлов: ${v.nodes.length}. ${targets}${summary ? `. ${summary}` : ''}`,
-        // Правило и узлы: нарушение на другом элементе — другая находка (ревью Codex, R7).
+        // Правило и узлы: нарушение на другом элементе — другая находка.
         target: `${v.id} ${v.nodes
           .map((n) => n.target.join(' '))
           .sort()
