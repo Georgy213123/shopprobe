@@ -15,6 +15,7 @@ from app.schemas import (
     CategoryOut,
     Health,
     Meta,
+    Problem,
     ProductCard,
     ProductDetail,
 )
@@ -68,7 +69,7 @@ def catalog(session: SessionDep, query: Annotated[CatalogQuery, Query()]) -> Cat
 @router.get(
     "/products/{slug}",
     tags=["catalog"],
-    responses={404: {"description": "Товар не найден"}},
+    responses={404: {"model": Problem, "description": "Товар не найден"}},
 )
 def product(slug: str, session: SessionDep) -> ProductDetail:
     found = repository.get_product(session, slug)
@@ -80,7 +81,12 @@ def product(slug: str, session: SessionDep) -> ProductDetail:
 @router.get(
     "/recommendations",
     tags=["catalog"],
-    responses={503: {"description": "Сервис рекомендаций недоступен (посаженный дефект)"}},
+    responses={
+        503: {
+            "model": Problem,
+            "description": "Сервис рекомендаций недоступен (посаженный дефект)",
+        }
+    },
 )
 def recommendations(
     request: Request, session: SessionDep, settings: SettingsDep
@@ -95,7 +101,10 @@ def recommendations(
     "/images/{slug}.svg",
     tags=["media"],
     response_class=Response,
-    responses={200: {"content": {"image/svg+xml": {}}}, 404: {"description": "Нет товара"}},
+    responses={
+        200: {"content": {"image/svg+xml": {}}},
+        404: {"model": Problem, "description": "Нет товара"},
+    },
 )
 def image(slug: str, session: SessionDep, settings: SettingsDep) -> Response:
     p = session.scalars(select(Product).where(Product.slug == slug)).one_or_none()

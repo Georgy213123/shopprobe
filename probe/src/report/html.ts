@@ -80,7 +80,7 @@ code{font-size:12px}
 <div class="card"><b>${s.confirmed}</b>подтверждено</div>
 <div class="card"><b>${s.flaky}</b>нестабильно</div>
 <div class="card"><b>${s.notReproduced}</b>не подтвердилось</div>
-<div class="card"><b>${s.failed ? 'нет' : 'да'}</b>приёмка пройдена</div>
+<div class="card"><b>Приёмка: ${s.failed ? 'не пройдена' : 'пройдена'}</b>подтверждённых находок: ${s.confirmed}</div>
 </div>
 ${
   report.findings.length === 0

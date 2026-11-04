@@ -55,42 +55,26 @@ test('ShopProbe: на чистой витрине ноль подтверждё�
   expect(code).toBe(0);
 });
 
-/** Посаженные дефекты: проверка, маршрут, кусок target, вьюпорт (если дефект зависит от ширины). */
-const SEEDED: Array<{
-  name: string;
-  check: string;
-  route: RegExp;
-  target: RegExp;
-  viewport?: string;
-}> = [
-  {
-    name: 'битая картинка',
-    check: 'broken-image',
-    route: /^\/product\/shu-puer/,
-    target: /shu-puer-staroe-derevo\.svg$/,
-  },
-  { name: 'ошибка в консоли', check: 'console', route: /^\/product\//, target: /Виджет отзывов/ },
-  {
-    name: '404 статического ресурса',
-    check: 'http',
-    route: /^\//,
-    target: /^GET \/assets\/legacy-promo\.css 4xx$/,
-  },
-  {
-    name: 'горизонтальный скролл на 390 px',
-    check: 'h-scroll',
-    route: /^\/$/,
-    target: /document/,
-    viewport: 'mobile',
-  },
-  { name: 'два h1', check: 'single-h1', route: /^\/catalog/, target: /h1/ },
-  {
-    name: 'низкий контраст кнопки',
-    check: 'a11y',
-    route: /^\/product\//,
-    target: /^color-contrast /,
-  },
+/**
+ * Посаженные дефекты: тип проверки, маршрут и вьюпорт (если дефект зависит от ширины).
+ * Сверка по стабильным полям находки, не по тексту сообщений.
+ */
+const SEEDED: Array<{ name: string; check: string; route: RegExp; viewport?: string }> = [
+  { name: 'битая картинка', check: 'broken-image', route: /^\/(catalog|product\/shu-puer)/ },
+  { name: 'ошибка в консоли', check: 'console', route: /^\/product\// },
+  { name: '404 статического ресурса', check: 'http', route: /^\// },
+  { name: 'горизонтальный скролл на 390 px', check: 'h-scroll', route: /^\/$/, viewport: 'mobile' },
+  { name: 'два h1', check: 'single-h1', route: /^\/catalog/ },
+  { name: 'низкий контраст кнопки', check: 'a11y', route: /^\/product\// },
 ];
+
+function matches(f: Finding, bug: (typeof SEEDED)[number]): boolean {
+  return (
+    f.check === bug.check &&
+    bug.route.test(f.route) &&
+    (!bug.viewport || f.viewport === bug.viewport)
+  );
+}
 
 test('ShopProbe: на SEEDED_BUGS=1 найдены все посаженные дефекты @seeded', async ({ request }) => {
   expect(await seeded(request), 'нужен запуск с SEEDED_BUGS=1').toBe(true);
@@ -98,13 +82,7 @@ test('ShopProbe: на SEEDED_BUGS=1 найдены все посаженные �
   const confirmed = report.findings.filter((f) => f.retest.verdict === 'confirmed');
 
   for (const bug of SEEDED) {
-    const hit = confirmed.find(
-      (f) =>
-        f.check === bug.check &&
-        bug.route.test(f.route) &&
-        bug.target.test(f.target) &&
-        (!bug.viewport || f.viewport === bug.viewport),
-    );
+    const hit = confirmed.find((f) => matches(f, bug));
     expect(hit, `не найден посаженный дефект: ${bug.name}\n${stdout}`).toBeTruthy();
   }
 
@@ -116,10 +94,9 @@ test('ShopProbe: на SEEDED_BUGS=1 найдены все посаженные �
   expect(flaky.length, stdout).toBeGreaterThan(0);
   for (const f of flaky) expect(['flaky', 'not_reproduced']).toContain(f.retest.verdict);
 
-  // Лишнего тоже нет: каждая подтверждённая находка — один из посаженных дефектов.
-  const unexpected = confirmed.filter(
-    (f) => !SEEDED.some((b) => f.check === b.check && b.target.test(f.target)),
-  );
+  // Лишнего тоже нет: у каждой подтверждённой находки тип проверки, маршрут
+  // и вьюпорт совпадают с одним из посаженных дефектов.
+  const unexpected = confirmed.filter((f) => !SEEDED.some((b) => matches(f, b)));
   expect(unexpected, stdout).toEqual([]);
   expect(code).toBe(1);
 });

@@ -74,6 +74,19 @@ describe('HTML-отчёт', () => {
     expect(html).toContain('<li>Смотреть</li>');
   });
 
+  it('итог приёмки в карточке однозначен: пройдена', () => {
+    const html = renderHtml(report([]));
+    expect(html).toContain('Приёмка: пройдена');
+    expect(html).not.toContain('не пройдена');
+    expect(html).toContain('подтверждённых находок: 0');
+  });
+
+  it('итог приёмки в карточке однозначен: не пройдена', () => {
+    const html = renderHtml(report([finding({}), finding({ id: 'b' })]));
+    expect(html).toContain('Приёмка: не пройдена');
+    expect(html).toContain('подтверждённых находок: 2');
+  });
+
   it('подтверждённые и серьёзные идут первыми', () => {
     const sorted = sortFindings([
       finding({ id: 'nr', retest: { attempts: 3, reproduced: 0, verdict: 'not_reproduced' } }),

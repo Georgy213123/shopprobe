@@ -102,3 +102,9 @@ class Meta(BaseModel):
 
 class Health(BaseModel):
     status: Literal["ok"]
+
+
+class Problem(BaseModel):
+    """Тело ошибки: так FastAPI отвечает на 404 и 503."""
+
+    detail: str
