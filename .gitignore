@@ -13,3 +13,22 @@ e2e/.logs/
 probe/reports/
 probe/test-results/
 *.tsbuildinfo
+
+# Общее
+.env.*
+!.env.example
+*.pem
+*.key
+*.py[cod]
+.coverage
+htmlcov/
+coverage.xml
+.vite/
+playwright-report/
+test-results/
+blob-report/
+probe-report/
+.DS_Store
+.idea/
+.vscode/
+*.swp

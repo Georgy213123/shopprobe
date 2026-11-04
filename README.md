@@ -1,5 +1,9 @@
 # ShopProbe
 
+[![CI](https://github.com/Georgy213123/shopprobe/actions/workflows/ci.yml/badge.svg)](https://github.com/Georgy213123/shopprobe/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Georgy213123/shopprobe/actions/workflows/codeql.yml/badge.svg)](https://github.com/Georgy213123/shopprobe/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Владелец интернет-магазина перед выкаткой проходит сайт с ноутбука и телефона и всё равно
 пропускает битую вёрстку и ошибки в консоли. ShopProbe прогоняет Playwright-проверки по страницам
 на двух вьюпортах, перепроверяет каждую находку в чистом браузере и подтверждает только повторившееся.
@@ -83,3 +87,8 @@ make install && make dev   # SEEDED_BUGS=1 make dev — с дефектами
 [Тесты](docs/05-testing.md) · [Баги](docs/06-bugs.md) · [Релизы](docs/07-releases.md)
 
 Стек: TypeScript, Playwright, axe-core · Python, FastAPI, PostgreSQL · React.
+
+---
+
+Один из трёх кейсов витрины [ai-product-engineering](https://github.com/Georgy213123/ai-product-engineering):
+там же процесс работы с агентами и два других кейса.
