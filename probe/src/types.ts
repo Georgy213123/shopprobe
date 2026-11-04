@@ -68,7 +68,11 @@ export interface Summary {
   flaky: number;
   notReproduced: number;
   confirmedBySeverity: Record<Severity, number>;
+  /** Находки с вердиктом «подтверждено» выше порога. */
   failed: boolean;
+  /** Число сбоев навигации и самих проверок (любой вердикт): приёмка неполная. */
+  incompleteChecks: number;
+  incomplete: boolean;
 }
 
 export interface Report {

@@ -9,12 +9,13 @@ import { runProbe } from './run';
 
 const HELP = `shopprobe [--config probe.config.ts] [--base-url URL] [--out DIR] [--retest N] [--routes /a,/b]
 
-Коды выхода: 0 — приёмка пройдена, 1 — есть подтверждённые находки выше порога, 2 — ошибка запуска.`;
+Коды выхода: 0 — приёмка пройдена, 1 — есть подтверждённые находки выше порога,
+2 — ошибка запуска, 3 — приёмка неполная: страница не открылась или проверка не выполнилась.`;
 
 async function main(): Promise<number> {
   const { values } = parseArgs({
     options: {
-      config: { type: 'string', default: 'probe.config.ts' },
+      config: { type: 'string' },
       'base-url': { type: 'string' },
       out: { type: 'string' },
       retest: { type: 'string' },
@@ -27,8 +28,13 @@ async function main(): Promise<number> {
     return 0;
   }
 
-  const configPath = resolve(values.config);
+  const configPath = resolve(values.config ?? 'probe.config.ts');
   let user: UserConfig = {};
+  // Файл по умолчанию может отсутствовать, а явно названный — нет: опечатка в пути
+  // иначе молча давала проверку localhost.
+  if (values.config !== undefined && !existsSync(configPath)) {
+    throw new Error(`конфиг не найден: ${configPath}`);
+  }
   if (existsSync(configPath)) {
     const mod = (await import(pathToFileURL(configPath).href)) as { default?: UserConfig };
     user = mod.default ?? {};
@@ -47,7 +53,8 @@ async function main(): Promise<number> {
   const files = await writeReport(report, resolve(config.outputDir));
   console.log(consoleSummary(report));
   console.log(`отчёт: ${files.html}\n        ${files.json}`);
-  return report.summary.failed ? 1 : 0;
+  if (report.summary.failed) return 1;
+  return report.summary.incomplete ? 3 : 0;
 }
 
 main().then(

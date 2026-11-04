@@ -61,6 +61,14 @@ export async function startFixtureServer(): Promise<FixtureServer> {
         page('dies', '<h1>Т</h1><div style="width:600px">ш</div>'),
       );
     }
+    // SP-02: дефект есть всегда, но один из визитов (второй) страница не отдаёт.
+    if (path === '/dyn/dies-on-second') {
+      if (hit(path) === 2) {
+        req.socket.destroy();
+        return;
+      }
+      return send(200, 'text/html; charset=utf-8', page('d2', '<h1>А</h1><h1>Б</h1>'));
+    }
     // Находка 4: эндпоинт всегда сломан, но код меняется 500 → 503.
     if (path === '/flip-status') return send(hit(path) === 1 ? 500 : 503, 'application/json', '{}');
     // Находка 7: нарушение контраста переезжает на другой элемент после первого визита.

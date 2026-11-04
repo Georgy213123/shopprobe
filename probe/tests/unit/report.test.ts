@@ -101,3 +101,31 @@ describe('HTML-отчёт', () => {
     expect(text.split('\n').at(-1)).toBe('ИТОГ: приёмка не пройдена (порог moderate)');
   });
 });
+
+describe('неполная приёмка (SP-02)', () => {
+  const probeError = finding({
+    id: 'pe',
+    target: 'probe-error',
+    severity: 'critical',
+    retest: { attempts: 3, reproduced: 1, verdict: 'flaky' },
+  });
+  const summary = summarize(config, [], [probeError]);
+  const report: Report = {
+    tool: 'shopprobe',
+    version: 'test',
+    baseUrl: 'http://localhost:5201',
+    startedAt: '2026-01-01T00:00:00.000Z',
+    durationMs: 1000,
+    retestAttempts: 3,
+    failOn: 'moderate',
+    pages: [],
+    findings: [probeError],
+    summary,
+  };
+
+  it('сбой проверки с нестабильным вердиктом не даёт зелёный итог', () => {
+    expect(summary).toMatchObject({ failed: false, incomplete: true, incompleteChecks: 1 });
+    expect(renderHtml(report)).toContain('Приёмка: неполная');
+    expect(consoleSummary(report).split('\n').at(-1)).toContain('приёмка неполная');
+  });
+});

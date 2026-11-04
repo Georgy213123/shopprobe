@@ -76,7 +76,7 @@ make probe               # прогон, отчёт в probe/reports/latest/
 make install && make dev   # SEEDED_BUGS=1 make dev — с дефектами
 ```
 
-Проверки: `make lint test e2e`, последний прогон — 134 теста, все зелёные. Другая витрина —
+Проверки: `make lint test e2e`, последний прогон — 149 тестов, все зелёные. Другая витрина —
 правка `baseUrl` и `routes` в [`probe/probe.config.ts`](probe/probe.config.ts).
 
 ## Как это сделано

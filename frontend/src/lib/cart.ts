@@ -52,7 +52,10 @@ function isLine(x: unknown): x is CartLine {
     typeof l.slug === 'string' &&
     typeof l.name === 'string' &&
     typeof l.price === 'number' &&
+    Number.isFinite(l.price) &&
+    l.price >= 0 &&
     typeof l.qty === 'number' &&
+    Number.isInteger(l.qty) &&
     l.qty >= 1
   );
 }
@@ -76,7 +79,12 @@ export function loadCart(storage: Pick<Storage, 'getItem'> | null): CartLine[] {
     const raw = storage.getItem(CART_KEY);
     if (!raw) return [];
     const data: unknown = JSON.parse(raw);
-    return Array.isArray(data) ? data.filter(isLine).map((l) => ({ ...l, qty: clamp(l.qty) })) : [];
+    if (!Array.isArray(data)) return [];
+    const seen = new Set<string>();
+    return data
+      .filter(isLine)
+      .filter((l) => !seen.has(l.slug) && seen.add(l.slug))
+      .map((l) => ({ ...l, qty: clamp(l.qty) }));
   } catch {
     return [];
   }

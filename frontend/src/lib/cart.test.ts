@@ -60,6 +60,16 @@ describe('хранение корзины', () => {
     },
   );
 
+  it('отбрасывает строки с недопустимой ценой, количеством и дубли', () => {
+    const raw =
+      '[{"slug":"a","name":"A","price":-100,"qty":1},' +
+      '{"slug":"b","name":"B","price":1e309,"qty":1},' +
+      '{"slug":"c","name":"C","price":10,"qty":1.5},' +
+      '{"slug":"d","name":"D","price":0,"qty":2},' +
+      '{"slug":"d","name":"D2","price":99,"qty":5}]';
+    expect(loadCart(storage(raw))).toEqual([{ slug: 'd', name: 'D', price: 0, qty: 2 }]);
+  });
+
   it('не падает, если хранилище недоступно', () => {
     expect(() =>
       saveCart(

@@ -27,8 +27,11 @@ export function consoleSummary(report: Report): string {
       `  ${v} ${f.severity.padEnd(8)} ${f.viewport.padEnd(8)} ${f.route.padEnd(34)} ${f.title}: ${f.target}`,
     );
   }
-  lines.push(
-    s.failed ? `ИТОГ: приёмка не пройдена (порог ${report.failOn})` : 'ИТОГ: приёмка пройдена',
-  );
+  const incomplete = s.incomplete
+    ? `; неполная: сбоев страниц и проверок ${s.incompleteChecks}`
+    : '';
+  if (s.failed) lines.push(`ИТОГ: приёмка не пройдена (порог ${report.failOn})${incomplete}`);
+  else if (s.incomplete) lines.push(`ИТОГ: приёмка неполная${incomplete.slice(1)}`);
+  else lines.push('ИТОГ: приёмка пройдена');
   return lines.join('\n');
 }

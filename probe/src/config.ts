@@ -101,6 +101,10 @@ export function resolveConfig(user: UserConfig = {}, overrides: UserConfig = {})
   return merged;
 }
 
+function isSeverity(v: unknown): boolean {
+  return typeof v === 'string' && Object.hasOwn(SEVERITY_RANK, v);
+}
+
 function validate(c: ProbeConfig): void {
   try {
     new URL(c.baseUrl);
@@ -122,12 +126,12 @@ function validate(c: ProbeConfig): void {
       `viewports: имя «${dup}» повторяется — перепроверка ищет вьюпорт по имени`,
     );
   // Конфиг грузится через tsx без проверки типов: значения проверяем в рантайме.
-  if (!(c.thresholds.failOn in SEVERITY_RANK)) {
+  if (!isSeverity(c.thresholds.failOn)) {
     throw new ConfigError(
       `thresholds.failOn: ${String(c.thresholds.failOn)}; допустимо: ${SEVERITIES}`,
     );
   }
-  if (!(c.a11y.minImpact in SEVERITY_RANK)) {
+  if (!isSeverity(c.a11y.minImpact)) {
     throw new ConfigError(`a11y.minImpact: ${String(c.a11y.minImpact)}; допустимо: ${SEVERITIES}`);
   }
   const unknown = c.checks.filter((x) => !ALL_CHECKS.includes(x));

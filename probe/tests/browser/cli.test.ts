@@ -20,9 +20,9 @@ beforeAll(async () => {
 afterAll(async () => server?.close());
 
 /** Асинхронно: сервер фикстур живёт в этом же процессе и должен отвечать CLI. */
-function cli(routes: string) {
+function cli(routes: string, config = 'tests/browser/empty.config.ts') {
   const out = mkdtempSync(join(tmpdir(), 'shopprobe-cli-'));
-  const args = ['tsx', 'src/cli.ts', '--config', 'нет-такого.ts', '--base-url', server.url];
+  const args = ['tsx', 'src/cli.ts', '--config', config, '--base-url', server.url];
   args.push('--routes', routes, '--out', out, '--retest', '2');
   return new Promise<{ code: number; stdout: string; report: Report; html: string }>(
     (done, fail) => {
@@ -43,6 +43,21 @@ function cli(routes: string) {
 }
 
 describe('CLI через tsx', () => {
+  it('SP-03: явно указанный отсутствующий конфиг — код 2 и полный путь', async () => {
+    const missing = join(PROBE, 'нет-такого.config.ts');
+    const { code, stderr } = await new Promise<{ code: number; stderr: string }>((done) => {
+      execFile(
+        'npx',
+        ['tsx', 'src/cli.ts', '--config', missing, '--base-url', server.url],
+        { cwd: PROBE, encoding: 'utf8', timeout: 60_000 },
+        (err, _out, stderr) =>
+          done({ code: Number((err as { code?: number })?.code ?? 0), stderr }),
+      );
+    });
+    expect(code).toBe(2);
+    expect(stderr).toContain(missing);
+  });
+
   it('чистая страница без находок, настоящий дефект найден, код выхода 1', async () => {
     const { code, report, stdout } = await cli('/fixtures/clean.html,/fixtures/real-overflow.html');
     const navigation = report.findings.filter((f) => f.target === 'navigation');
@@ -53,6 +68,16 @@ describe('CLI через tsx', () => {
     expect(report.findings.map((f) => `${f.check}:${f.viewport}`)).toEqual(['h-scroll:mobile']);
     expect(code).toBe(1);
     expect(stdout).toContain('ИТОГ: приёмка не пройдена');
+  });
+
+  it('SP-02: сбой страницы в одном повторе — код выхода 3, не 0 и не 1', async () => {
+    const { code, stdout, report } = await cli(
+      '/dyn/dies-on-second',
+      'tests/browser/desktop-only.config.ts',
+    );
+    expect(report.summary).toMatchObject({ failed: false, incomplete: true });
+    expect(stdout).toContain('приёмка неполная');
+    expect(code).toBe(3);
   });
 
   it('пишет HTML-отчёт с таблицей находок', async () => {

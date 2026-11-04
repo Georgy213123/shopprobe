@@ -4,7 +4,7 @@ import { atLeast, makeRetest } from './finding';
 import { inspectPage } from './inspect';
 import type { Finding, PageVisit, Report, ReportedFinding, Summary } from './types';
 
-export const VERSION = '1.0.3';
+export const VERSION = '1.0.4';
 
 export interface RunOptions {
   browser?: Browser;
@@ -30,9 +30,9 @@ export async function retestFindings(
   }
 
   const reproduced = new Map<string, number>();
-  // Сбой навигации или проверки, которого не было в основном проходе, тоже попадает
-  // в отчёт: иначе упавшая после первого визита витрина давала «не подтвердилось»
-  // по исходной находке и зелёную приёмку (ревью Codex, R2).
+  // Любая находка, которой не было в основном проходе, тоже попадает в отчёт и
+  // перепроверяется так же: упавшая после первого визита витрина, новый ресурс с 404,
+  // нарушение на другом элементе (ревью Codex, R2, SP-01).
   const emerged = new Map<string, { finding: Finding; count: number }>();
   for (const group of groups.values()) {
     const first = group[0]!;
@@ -44,7 +44,7 @@ export async function retestFindings(
       const visit = await inspectPage(browser, config, first.route, viewport);
       for (const f of visit.findings) {
         if (known.has(f.id)) reproduced.set(f.id, (reproduced.get(f.id) ?? 0) + 1);
-        else if (f.target === 'navigation' || f.target === 'probe-error') {
+        else {
           const e = emerged.get(f.id) ?? { finding: f, count: 0 };
           e.count += 1;
           emerged.set(f.id, e);
@@ -63,6 +63,11 @@ export function summarize(
   pages: PageVisit[],
   findings: ReportedFinding[],
 ): Summary {
+  // Состояние выполнения отдельно от вердиктов о дефектах: страница не открылась или
+  // проверка упала хотя бы в одном визите — приёмка неполная, даже если находка нестабильна.
+  const incomplete = findings.filter(
+    (f) => f.target === 'navigation' || f.target === 'probe-error',
+  );
   const confirmed = findings.filter((f) => f.retest.verdict === 'confirmed');
   const bySeverity = { critical: 0, serious: 0, moderate: 0, minor: 0 };
   for (const f of confirmed) bySeverity[f.severity] += 1;
@@ -73,6 +78,8 @@ export function summarize(
     flaky: findings.filter((f) => f.retest.verdict === 'flaky').length,
     notReproduced: findings.filter((f) => f.retest.verdict === 'not_reproduced').length,
     confirmedBySeverity: bySeverity,
+    incompleteChecks: incomplete.length,
+    incomplete: incomplete.length > 0,
     failed: confirmed.some((f) => atLeast(f.severity, config.thresholds.failOn)),
   };
 }

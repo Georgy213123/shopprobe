@@ -5,6 +5,8 @@
 import { chromium, type Browser } from 'playwright';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { resolveConfig, type UserConfig } from '../../src/config';
+import { renderHtml } from '../../src/report/html';
+import { consoleSummary } from '../../src/report/write';
 import { runProbe } from '../../src/run';
 import type { Viewport } from '../../src/types';
 import { startFixtureServer, type FixtureServer } from './server';
@@ -65,6 +67,26 @@ describe('ревью Codex: перепроверка', () => {
     const f = report.findings.find((x) => x.target.startsWith('color-contrast'));
     expect(f?.details).toContain('#old-button');
     expect(f?.retest.verdict).toBe('not_reproduced');
+  });
+
+  it('SP-01: новое нарушение на другом элементе подтверждается, приёмка не проходит', async () => {
+    const report = await probe(['/dyn/contrast-moving'], { checks: ['a11y'] });
+    const added = report.findings.find(
+      (x) => x.target.startsWith('color-contrast') && x.details.includes('#different-button'),
+    );
+    expect(added?.retest).toMatchObject({ reproduced: 3, verdict: 'confirmed' });
+    expect(report.summary.failed).toBe(true);
+  });
+
+  it('SP-02: проверка не выполнилась в одном из повторов — приёмка неполная', async () => {
+    const report = await probe(['/dyn/dies-on-second'], { checks: ['single-h1'] });
+    const h1 = report.findings.find((f) => f.check === 'single-h1');
+    expect(h1?.retest.verdict).toBe('flaky');
+    const nav = report.findings.find((f) => f.target === 'navigation');
+    expect(nav?.retest.verdict).toBe('flaky');
+    expect(report.summary).toMatchObject({ failed: false, incomplete: true, incompleteChecks: 1 });
+    expect(consoleSummary(report)).toContain('ИТОГ: приёмка неполная');
+    expect(renderHtml(report)).toContain('Приёмка: неполная');
   });
 });
 

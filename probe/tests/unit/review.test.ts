@@ -17,6 +17,18 @@ describe('ревью Codex: конфиг', () => {
     expect(() => resolveConfig({ thresholds: { failOn: 'critcal' as never } })).toThrow(/failOn/);
     expect(() => resolveConfig({ a11y: { minImpact: 'high' as never } })).toThrow(/minImpact/);
   });
+
+  it.each(['toString', 'constructor', '__proto__', '', 7])(
+    'SP-04: failOn и minImpact не принимают унаследованное свойство %s',
+    (bad) => {
+      expect(() => resolveConfig({ thresholds: { failOn: bad as never } })).toThrow(/failOn/);
+      expect(() => resolveConfig({ a11y: { minImpact: bad as never } })).toThrow(/minImpact/);
+    },
+  );
+
+  it.each(['critical', 'serious', 'moderate', 'minor'])('SP-04: %s допустим', (ok) => {
+    expect(() => resolveConfig({ thresholds: { failOn: ok as never } })).not.toThrow();
+  });
 });
 
 describe('ревью Codex: фильтры и отпечатки', () => {
