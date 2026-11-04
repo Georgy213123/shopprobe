@@ -34,10 +34,14 @@ export async function startFixtureServer(): Promise<FixtureServer> {
     };
     if (path === '/@vite/client') {
       // Так клиент HMR Vite ведёт себя, когда WebSocket недоступен (стенд за прокси).
+      // Первая строка — как forwardConsole в Vite: console.error оборачивается, и у любой
+      // ошибки приложения источник в CDP — /@vite/client (BUG-09).
       return send(
         200,
         'text/javascript',
         [
+          'const __viteOriginalError = console.error;',
+          'console.error = function (...args) { __viteOriginalError.apply(console, args); };',
           'console.error("WebSocket connection to \'ws://localhost:1/\' failed");',
           'console.error("[vite] failed to connect to websocket (Error: WebSocket closed without opened.).");',
           'console.error("Failed to send error to Vite server: Error: WebSocket closed without opened.");',

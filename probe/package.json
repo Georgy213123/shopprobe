@@ -1,7 +1,7 @@
 {
   "name": "shopprobe",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Автоматическая приёмка интернет-витрины: Playwright-проверки с перепроверкой находок",
   "type": "module",
   "bin": {

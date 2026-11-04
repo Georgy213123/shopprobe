@@ -4,7 +4,7 @@ import { atLeast, makeRetest } from './finding';
 import { inspectPage } from './inspect';
 import type { Finding, PageVisit, Report, ReportedFinding, Summary } from './types';
 
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 
 export interface RunOptions {
   browser?: Browser;

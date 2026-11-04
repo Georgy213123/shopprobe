@@ -1,6 +1,6 @@
 /**
  * Проверки ShopProbe на фикстурах в настоящем Chromium.
- * Регрессионные тесты BUG-01, BUG-02, BUG-04, BUG-05 из docs/06-bugs.md.
+ * Регрессионные тесты BUG-01, BUG-02, BUG-04, BUG-05, BUG-09 из docs/06-bugs.md.
  */
 import { chromium, type Browser } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -75,6 +75,11 @@ describe('h-scroll', () => {
 describe('console', () => {
   it('BUG-04: шум HMR дев-сервера не даёт находок', async () => {
     expect(await visit('dev-noise.html', ['console'])).toEqual([]);
+  });
+
+  it('BUG-09: ошибка приложения под дев-сервером Vite — находка, хотя источник /@vite/client', async () => {
+    const findings = await visit('vite-dev-app-error.html', ['console']);
+    expect(findings.map((f) => f.target)).toEqual(['Виджет отзывов: не удалось разобрать ответ']);
   });
 
   it('ошибка приложения в консоли — находка', async () => {

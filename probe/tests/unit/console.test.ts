@@ -14,7 +14,15 @@ describe('фильтр консоли', () => {
     );
   });
 
-  it('BUG-04: всё, что пишет клиент HMR из /@vite/client, отсекается по источнику', () => {
+  it('BUG-09: ошибка приложения, обёрнутая forwardConsole Vite, проходит фильтр', () => {
+    const e = ev(
+      'Виджет отзывов: не удалось разобрать ответ SyntaxError: Unexpected end of JSON input',
+      'http://localhost:5201/@vite/client',
+    );
+    expect(isIgnoredConsole(e, DEFAULT_CONSOLE_IGNORE)).toBe(false);
+  });
+
+  it('BUG-04: служебные сообщения клиента HMR из /@vite/client отсекаются', () => {
     const e = ev(
       'Failed to send error to Vite server: Error: WebSocket closed without opened.',
       'http://localhost:5201/@vite/client',

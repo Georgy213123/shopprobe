@@ -39,9 +39,10 @@ export type UserConfig = Partial<
  * См. docs/06-bugs.md, BUG-04.
  */
 export const DEFAULT_CONSOLE_IGNORE: Array<string | RegExp> = [
-  // Клиент HMR Vite: и его собственные сообщения, и всё, что пишется из /@vite/client.
+  // Клиент HMR Vite. Источник /@vite/client сюда класть нельзя: Vite оборачивает console.error,
+  // и источник любой ошибки приложения — /@vite/client (BUG-09). Остальной шум клиента —
+  // в checks/console.ts::isViteClientNoise.
   /^\[vite\]/,
-  '/@vite/client',
   /^\[HMR\]/,
   /^\[webpack-dev-server\]/,
   'chrome-extension://',
