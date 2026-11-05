@@ -1,17 +1,19 @@
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { FacetFilter } from '../components/FacetFilter';
-import { ProductTile } from '../components/ProductTile';
-import { api } from '../lib/api';
+'use client';
+
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { FacetFilter } from '@/components/FacetFilter';
+import { ProductTile } from '@/components/ProductTile';
+import { api } from '@/lib/api';
 import {
   parseCatalogState,
   toSearchParams,
   toggleValue,
   type CatalogState,
   type Sort,
-} from '../lib/catalogQuery';
-import { useSeededBugs } from '../lib/contexts';
-import { useFetch } from '../lib/useFetch';
+} from '@/lib/catalogQuery';
+import { useSeededBugs } from '@/lib/contexts';
+import { useFetch } from '@/lib/useFetch';
 
 const SORT_LABELS: Record<Sort, string> = {
   popular: 'Сначала популярные',
@@ -20,10 +22,12 @@ const SORT_LABELS: Record<Sort, string> = {
   name: 'По названию',
 };
 
-export function CatalogPage() {
-  const [params, setParams] = useSearchParams();
+function Catalog() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = new URLSearchParams(useSearchParams().toString());
   const urlQuery = toSearchParams(parseCatalogState(params)).toString();
-  // React Router обновляет URL в transition, и управляемый чекбокс на мгновение
+  // Навигация обновляет URL в transition, и управляемый чекбокс на мгновение
   // откатывается. Держим выбор локально, пока URL не сдвинется (вперёд или по «назад»).
   const [pending, setPending] = useState<{ from: string; state: CatalogState } | null>(null);
   // URL сдвинулся — локальный выбор больше не нужен (сброс во время рендера, без эффекта).
@@ -42,7 +46,8 @@ export function CatalogPage() {
   const update = (next: CatalogState) => {
     const nextParams = toSearchParams(next);
     setPending({ from: urlQuery, state: next });
-    setParams(nextParams);
+    const qs = nextParams.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
   };
   const priceInput = (key: 'priceMin' | 'priceMax', raw: string) => {
     const n = raw === '' ? null : Math.max(0, Math.trunc(Number(raw)));
@@ -138,5 +143,14 @@ export function CatalogPage() {
         </section>
       </div>
     </>
+  );
+}
+
+// Без Suspense useSearchParams не даёт собрать страницу.
+export default function CatalogPage() {
+  return (
+    <Suspense>
+      <Catalog />
+    </Suspense>
   );
 }

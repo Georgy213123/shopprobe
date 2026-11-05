@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom';
-import type { ProductCard } from '../lib/api';
-import { formatPrice, formatWeight } from '../lib/format';
+import Link from 'next/link';
+import type { ProductCard } from '@/lib/api';
+import { formatPrice, formatWeight } from '@/lib/format';
 
 export function ProductTile({ product, eager = false }: { product: ProductCard; eager?: boolean }) {
   return (
     <article className="tile" data-testid="product-tile">
-      <Link to={`/product/${product.slug}`} className="tile-link">
+      <Link href={`/product/${product.slug}`} className="tile-link">
         <img
           src={product.image_url}
           alt={product.name}

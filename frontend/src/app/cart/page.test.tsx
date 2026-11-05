@@ -1,18 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CART_KEY } from '../lib/cart';
-import { AppProviders } from '../lib/context';
-import { CartPage } from './CartPage';
+import { CART_KEY } from '@/lib/cart';
+import { AppProviders } from '@/lib/context';
+import CartPage from './page';
 
 function renderCart() {
   return render(
-    <MemoryRouter>
-      <AppProviders>
-        <CartPage />
-      </AppProviders>
-    </MemoryRouter>,
+    <AppProviders>
+      <CartPage />
+    </AppProviders>,
   );
 }
 

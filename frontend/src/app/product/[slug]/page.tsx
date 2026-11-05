@@ -1,9 +1,12 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { api, ApiError } from '../lib/api';
-import { useCart, useSeededBugs } from '../lib/contexts';
-import { formatPrice, formatWeight } from '../lib/format';
-import { useFetch } from '../lib/useFetch';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { api, ApiError } from '@/lib/api';
+import { useCart, useSeededBugs } from '@/lib/contexts';
+import { formatPrice, formatWeight } from '@/lib/format';
+import { useFetch } from '@/lib/useFetch';
 
 /** Посаженный дефект: виджет отзывов падает на разборе ответа и пишет ошибку в консоль. */
 function BrokenReviews() {
@@ -17,8 +20,8 @@ function BrokenReviews() {
   return null;
 }
 
-export function ProductPage() {
-  const { slug = '' } = useParams();
+export default function ProductPage() {
+  const { slug } = useParams<{ slug: string }>();
   const state = useFetch((signal) => api.product(slug, signal), slug);
   const { dispatch } = useCart();
   const seeded = useSeededBugs();
@@ -31,7 +34,7 @@ export function ProductPage() {
       <>
         <h1>{notFound ? 'Товар не найден' : 'Ошибка загрузки'}</h1>
         <p>
-          <Link to="/catalog">Вернуться в каталог</Link>
+          <Link href="/catalog">Вернуться в каталог</Link>
         </p>
       </>
     );
@@ -44,7 +47,7 @@ export function ProductPage() {
       <img src={p.image_url} alt={p.name} width={480} height={360} className="product-image" />
       <div className="product-info">
         <p className="crumbs">
-          <Link to="/catalog">Каталог</Link> / {p.category_title}
+          <Link href="/catalog">Каталог</Link> / {p.category_title}
         </p>
         <h1>{p.name}</h1>
         <dl className="props">

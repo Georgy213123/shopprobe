@@ -1,9 +1,11 @@
-import { Link } from 'react-router-dom';
-import { cartTotal, MAX_QTY } from '../lib/cart';
-import { useCart } from '../lib/contexts';
-import { formatPrice } from '../lib/format';
+'use client';
 
-export function CartPage() {
+import Link from 'next/link';
+import { cartTotal, MAX_QTY } from '@/lib/cart';
+import { useCart } from '@/lib/contexts';
+import { formatPrice } from '@/lib/format';
+
+export default function CartPage() {
   const { lines, dispatch } = useCart();
 
   if (lines.length === 0) {
@@ -11,7 +13,7 @@ export function CartPage() {
       <>
         <h1>Корзина</h1>
         <p>
-          Корзина пуста. <Link to="/catalog">Перейти в каталог</Link>
+          Корзина пуста. <Link href="/catalog">Перейти в каталог</Link>
         </p>
       </>
     );
@@ -23,7 +25,7 @@ export function CartPage() {
       <ul className="cart" data-testid="cart-lines">
         {lines.map((l) => (
           <li key={l.slug} className="cart-line">
-            <Link to={`/product/${l.slug}`} className="cart-name">
+            <Link href={`/product/${l.slug}`} className="cart-name">
               {l.name}
             </Link>
             <label className="qty">

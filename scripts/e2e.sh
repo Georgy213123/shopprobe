@@ -3,7 +3,7 @@
 #   1) браузерные тесты ShopProbe на фикстурах;
 #   2) витрина в чистом режиме: e2e покупателя + мета-тест «ноль подтверждённых»;
 #   3) витрина с SEEDED_BUGS=1: мета-тест «все посаженные дефекты найдены».
-# Витрина собирается и отдаётся через `vite preview` (как в проде, без HMR).
+# Витрина собирается и отдаётся через `next start` (как в проде, без HMR; адрес API вшивается при сборке).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT=$PWD
@@ -50,8 +50,8 @@ echo "== ShopProbe: браузерные тесты на фикстурах"
 
 echo "== стенд: миграции, наполнение, сборка фронта"
 (cd backend && uv run alembic upgrade head && uv run python -m app.seed)
-(cd frontend && npm run build >/dev/null)
-(cd frontend && API_URL="http://localhost:$API_PORT" exec npx vite preview --port "$WEB_PORT" --strictPort \
+(cd frontend && API_URL="http://localhost:$API_PORT" npm run build >/dev/null)
+(cd frontend && API_URL="http://localhost:$API_PORT" exec npx next start -p "$WEB_PORT" \
   >"$LOGS/web.log" 2>&1) &
 WEB_PID=$!
 

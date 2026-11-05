@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom';
-import { ProductTile } from '../components/ProductTile';
-import { api } from '../lib/api';
-import { useSeededBugs } from '../lib/contexts';
-import { useFetch } from '../lib/useFetch';
+'use client';
+
+import Link from 'next/link';
+import { ProductTile } from '@/components/ProductTile';
+import { api } from '@/lib/api';
+import { useSeededBugs } from '@/lib/contexts';
+import { useFetch } from '@/lib/useFetch';
 
 function Recommendations() {
   const state = useFetch((signal) => api.recommendations(signal), 'recommendations');
@@ -20,7 +22,7 @@ function Recommendations() {
   );
 }
 
-export function HomePage() {
+export default function HomePage() {
   const seeded = useSeededBugs();
   const categories = useFetch((signal) => api.categories(signal), 'categories');
 
@@ -31,7 +33,7 @@ export function HomePage() {
         <p>
           Листовой, прессованный и травяной чай. Соберите корзину — оформление в демо не подключено.
         </p>
-        <Link to="/catalog" className="button">
+        <Link href="/catalog" className="button">
           Перейти в каталог
         </Link>
       </section>
@@ -47,7 +49,7 @@ export function HomePage() {
           <ul className="chips">
             {categories.data.map((c) => (
               <li key={c.slug}>
-                <Link to={`/catalog?category=${c.slug}`}>
+                <Link href={`/catalog?category=${c.slug}`}>
                   {c.title} <span className="count">({c.product_count})</span>
                 </Link>
               </li>

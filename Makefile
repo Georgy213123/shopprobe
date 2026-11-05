@@ -28,7 +28,7 @@ up: ## весь стенд в Docker (postgres, backend, frontend); SEEDED_BUGS=
 down: ## остановить стенд Docker
 	docker compose down -v
 
-dev: ## локальный запуск без Docker: API :8201 + Vite :5201 (нужен PostgreSQL в DATABASE_URL)
+dev: ## локальный запуск без Docker: API :8201 + Next :5201 (нужен PostgreSQL в DATABASE_URL)
 	./scripts/dev.sh
 
 lint: ## ruff, mypy, eslint, tsc, prettier
