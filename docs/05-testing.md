@@ -16,15 +16,19 @@
 
 | История | Тесты |
 |---|---|
+| US-01 | e2e `US-01` |
 | US-02 | e2e `US-02`; `test_facets.py`; `catalogQuery.test.ts` |
+| US-03 | e2e `US-03, US-04`; `test_us03_product_card`, `test_product_not_found` |
 | US-04 | e2e `US-03, US-04`; `cart.test.ts`, `context.test.tsx` |
 | US-05 | `checks.test.ts`, `config.test.ts`, `cli.test.ts` |
 | US-06 | `checks.test.ts` → BUG-01, BUG-04; мета-тест на чистой |
+| US-07 | `report.test.ts`, `cli.test.ts` → «пишет HTML-отчёт» |
+| US-08 | `cli.test.ts` → коды 1, 2, 3; `report.test.ts` → итог «неполная» |
 | US-09 | мета-тест в двух режимах; `test_seeded_bugs_api.py` |
 
 ## Прогон тестов
 
-2026-11-04, после правок 1.0.4: `make lint test` и `CI=1 make e2e` — код 0; macOS, PostgreSQL 16, Playwright 1.62.1.
+2026-11-04, после правок 1.0.4: `make lint test` и `CI=1 make e2e` — код 0; macOS, PostgreSQL 16, Playwright 1.64.1. Перепрогон 2026-11-05 после перехода витрины на Next.js — те же 149, все зелёные.
 
 | Набор | Тестов | Время |
 |---|---|---|

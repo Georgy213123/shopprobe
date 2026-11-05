@@ -24,7 +24,7 @@ ShopProbe видит витрину как покупатель: браузер 
 C4Container
   Person(dev, "Разработчик")
   Container(probe, "ShopProbe CLI", "TypeScript, Playwright, axe-core", "прогон, перепроверка, отчёт")
-  ContainerDb(chromium, "Chromium", "Playwright 1.62.1")
+  ContainerDb(chromium, "Chromium", "Playwright 1.64.1")
   Container(web, "Фронт витрины", "Next.js, React 19")
   Container(api, "API витрины", "FastAPI, Python 3.12", "каталог, фасеты, флаг SEEDED_BUGS")
   ContainerDb(db, "PostgreSQL 16", "")
